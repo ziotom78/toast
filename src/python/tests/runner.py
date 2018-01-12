@@ -2,13 +2,16 @@
 # All rights reserved.  Use of this source code is governed by
 # a BSD-style license that can be found in the LICENSE file.
 
+print('runner.py : CHECKPOINT # 1', flush=True)
 from ..mpi import MPI
 
+print('runner.py : CHECKPOINT # 2', flush=True)
 import os
 import sys
 import unittest
 import warnings
 
+print('runner.py : CHECKPOINT # 3', flush=True)
 from .._version import __version__
 
 from .mpi import MPITestRunner
@@ -18,6 +21,7 @@ from ..vis import set_backend
 
 from .ctoast import test_ctoast
 
+print('runner.py : CHECKPOINT # 4', flush=True)
 from . import cbuffer as testcbuffer
 from . import cache as testcache
 from . import timing as testtiming
@@ -25,6 +29,7 @@ from . import rng as testrng
 from . import fft as testfft
 from . import dist as testdist
 from . import qarray as testqarray
+print('runner.py : CHECKPOINT # 5', flush=True)
 from . import tod as testtod
 from . import psd_math as testpsdmath
 from . import intervals as testintervals
@@ -34,6 +39,7 @@ from . import ops_dipole as testopsdipole
 from . import ops_simnoise as testopssimnoise
 from . import ops_polyfilter as testopspolyfilter
 from . import ops_groundfilter as testopsgroundfilter
+print('runner.py : CHECKPOINT # 6', flush=True)
 from . import ops_gainscrambler as testopsgainscrambler
 from . import ops_memorycounter as testopsmemorycounter
 from . import ops_madam as testopsmadam
@@ -41,6 +47,7 @@ from . import map_satellite as testmapsatellite
 from . import map_ground as testmapground
 from . import binned as testbinned
 
+print('runner.py : CHECKPOINT # 7', flush=True)
 from ..tod import tidas_available
 if tidas_available:
     from . import tidas as testtidas
@@ -50,6 +57,7 @@ if libsharp_available:
     from . import ops_sim_pysm as testopspysm
     from . import smooth as testsmooth
 
+print('runner.py : CHECKPOINT # 8', flush=True)
 
 def test(name=None):
     # We run tests with COMM_WORLD
@@ -125,3 +133,5 @@ def test(name=None):
         sys.exit(ret)
 
     return ret
+
+print('runner.py : CHECKPOINT # 9', flush=True)
