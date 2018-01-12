@@ -23,11 +23,17 @@ from .ctoast import test_ctoast
 
 print('runner.py : CHECKPOINT # 4', flush=True)
 from . import cbuffer as testcbuffer
+print('runner.py : importing testcache', flush=True)
 from . import cache as testcache
+print('runner.py : importing testtiming', flush=True)
 from . import timing as testtiming
+print('runner.py : importing rng', flush=True)
 from . import rng as testrng
+print('runner.py : importing fft', flush=True)
 from . import fft as testfft
+print('runner.py : importing dist', flush=True)
 from . import dist as testdist
+print('runner.py : importing testqarray', flush=True)
 from . import qarray as testqarray
 print('runner.py : CHECKPOINT # 5', flush=True)
 from . import tod as testtod
