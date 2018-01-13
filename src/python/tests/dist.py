@@ -2,16 +2,21 @@
 # All rights reserved.  Use of this source code is governed by
 # a BSD-style license that can be found in the LICENSE file.
 
+print('tests:dist.py importing MPI', flush=True)
 from ..mpi import MPI
+print('tests:dist.py importing MPItestCase', flush=True)
 from .mpi import MPITestCase
 
+print('tests:dist.py importing dist', flush=True)
 from ..dist import *
 
+print('tests:dist.py importing numpy', flush=True)
 import numpy as np
 
 import sys
 import os
 
+print('tests:dist.py defining DataTest', flush=True)
 
 class DataTest(MPITestCase):
 

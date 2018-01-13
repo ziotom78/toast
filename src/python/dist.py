@@ -2,13 +2,19 @@
 # All rights reserved.  Use of this source code is governed by
 # a BSD-style license that can be found in the LICENSE file.
 
+print('dist.py: importing MPI', flush=True)
+
 from .mpi import MPI
+
+print('dist.py: importing os', flush=True)
 
 import os
 
 import numpy as np
 import numpy.testing as nt
 
+
+print('dist.py: defining Comm', flush=True)
 
 class Comm(object):
     """
@@ -122,6 +128,8 @@ class Comm(object):
 
 # This is effectively the "Painter's Partition Problem".
 
+print('dist.py: defining distribute_required_groups', flush=True)
+
 def distribute_required_groups(A, max_per_group):
     ngroup = 1
     total = 0
@@ -131,6 +139,8 @@ def distribute_required_groups(A, max_per_group):
             total = A[i]
             ngroup += 1
     return ngroup
+
+print('dist.py: defining distribute_partition', flush=True)
 
 def distribute_partition(A, k):
     low = np.max(A)
@@ -144,6 +154,8 @@ def distribute_partition(A, k):
             low = mid + 1
     return low
 
+
+print('dist.py: defining distribute_discrete', flush=True)
 
 def distribute_discrete(sizes, groups, pow=1.0, breaks=None):
     """
@@ -213,6 +225,8 @@ def distribute_discrete(sizes, groups, pow=1.0, breaks=None):
     return dist
 
 
+print('dist.py: defining distribute_uniform', flush=True)
+
 def distribute_uniform(totalsize, groups, breaks=None):
     """
     Uniformly distribute items between groups.
@@ -279,6 +293,8 @@ def distribute_uniform(totalsize, groups, breaks=None):
 
     return dist
 
+
+print('dist.py: defining distribute_samples', flush=True)
 
 def distribute_samples(mpicomm, detectors, samples, detranks=1, detbreaks=None, sampsizes=None, sampbreaks=None):
     """
@@ -360,6 +376,8 @@ def distribute_samples(mpicomm, detectors, samples, detranks=1, detbreaks=None, 
 
     return (dist_dets, dist_samples, dist_sizes)
 
+
+print('dist.py: defining Data', flush=True)
 
 class Data(object):
     """
@@ -580,3 +598,5 @@ class Data(object):
             datasplit.append((value, new_data))
 
         return datasplit
+
+print('dist.py: DONE', flush=True)
