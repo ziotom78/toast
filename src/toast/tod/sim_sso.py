@@ -158,6 +158,7 @@ class OpSimSSO(Operator):
         model = model.reshape([n, n])
         beam = RectBivariateSpline(x, y, model)
         r = np.sqrt(w ** 2 + w ** 2)
+        # FIXME: normalize beam
         return beam, radius
 
     def _get_from_obs(self, name, obs):
@@ -247,6 +248,8 @@ class OpSimSSO(Operator):
             r = np.sqrt(x ** 2 + y ** 2)
             good = r < radius
             sig = beam(x[good], y[good], grid=False)
+            # FIXME: scale the signal to account for source distance
+            # and temperature
             ref[:][good] += sig
 
             del ref, sig, beam
