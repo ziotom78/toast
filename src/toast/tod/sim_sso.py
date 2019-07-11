@@ -22,6 +22,8 @@ import healpy as hp
 
 from scipy.constants import au as AU
 
+from scipy.interpolate import RectBivariateSpline
+
 
 def to_JD(t):
     # Unix time stamp to Julian date
@@ -54,12 +56,7 @@ class OpSimSSO(Operator):
              simulate and observe
     """
 
-    def __init__(
-            self,
-            name,
-            out="sso",
-            report_timing=False,
-    ):
+    def __init__(self, name, out="sso", report_timing=False):
         # Call the parent class constructor
         super().__init__()
 
@@ -92,7 +89,7 @@ class OpSimSSO(Operator):
             site_lon = self._get_from_obs("site_lon", obs)
             site_lat = self._get_from_obs("site_lat", obs)
             site_alt = self._get_from_obs("site_alt", obs)
-            
+
             observer = ephem.Observer()
             observer.lon = site_lon
             observer.lat = site_lat
@@ -100,7 +97,7 @@ class OpSimSSO(Operator):
             observer.epoch = "2000"
             observer.temp = 0  # in Celcius
             observer.compute_pressure()
-            
+
             prefix = "{} : {} : ".format(group, obsname)
             tod = self._get_from_obs("tod", obs)
             comm = tod.mpicomm
@@ -134,10 +131,34 @@ class OpSimSSO(Operator):
                 comm.Barrier()
             if rank == 0:
                 tmr.stop()
-                tmr.report(
-                    "{}Simulated and observed SSO signal" "".format(prefix)
-                )
+                tmr.report("{}Simulated and observed SSO signal" "".format(prefix))
         return
+
+    def _get_beam_map(self, det):
+        """
+        Construct a 2-dimensional interpolator for the beam
+        """
+        # FIXME: for now, just construct a symmetric Gaussian
+        n = 301
+        w = np.radians(3)
+        x = np.linspace(-w, w, n)
+        y = np.linspace(-w, w, n)
+        xgrid, ygrid = np.meshgrid(x, y)
+        fwhm_x = 3.0  # arc min
+        fwhm_y = 3.0  # arc min
+        theta = np.radians(0)  # orientation of the beam ellipsis
+        xsigma = np.radians(fwhm_x / 60) / 2.355
+        ysigma = np.radians(fwhm_y / 60) / 2.355
+        # Rotate the coordinates by -theta
+        rot = np.vstack(
+            [[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]]
+        )
+        xx, yy = np.dot(rot, np.vstack([xgrid.ravel(), ygrid.ravel()]))
+        model = amp * np.exp(-0.5 * (xx ** 2 / xsigma ** 2 + yy ** 2 / ysigma ** 2))
+        model = model.reshape([n, n])
+        beam = RectBivariateSpline(x, y, model)
+        r = np.sqrt(w ** 2 + w ** 2)
+        return beam, radius
 
     def _get_from_obs(self, name, obs):
         """ Extract value for name from observation.
@@ -218,15 +239,22 @@ class OpSimSSO(Operator):
                 az = 2 * np.pi - phi
                 el = np.pi / 2 - theta
 
-            # Interpolate the beam map at appropriate locations
-            ref[:] += hp.get_interp_val(sssmap, theta, phi)
+            beam, radius = self._get_beam_map(det)
 
-            del ref
+            # Interpolate the beam map at appropriate locations
+            x = (az - sso_az) * np.cos(el)
+            y = el - sso_el
+            r = np.sqrt(x ** 2 + y ** 2)
+            good = r < radius
+            sig = beam(x[good], y[good], grid=False)
+            ref[:][good] += sig
+
+            del ref, sig, beam
 
         if self._report_timing:
             if comm is not None:
                 comm.Barrier()
             if rank == 0:
                 tmr.stop()
-                tmr.report("{}OpSimSSS: Observe signal".format(prefix))
+                tmr.report("{}OpSimSSO: Observe signal".format(prefix))
         return
